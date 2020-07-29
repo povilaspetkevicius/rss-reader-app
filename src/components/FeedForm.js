@@ -52,14 +52,13 @@ const submitStatusMessage = {
 };
 
 const callService = (input) => {
-	console.log(input);
 	const callback = axios
 		.post(`${APIURL}/feeds`, input)
 		.then((response) => {
 			return response;
 		})
 		.catch((e) => {
-			throw new Error();
+			throw e;
 		});
 	return callback;
 };
@@ -67,21 +66,22 @@ const callService = (input) => {
 function FeedForm() {
 	const [url, setUrl] = useState('');
 	const [name, setName] = useState('');
-	const [showErrorMsg, setShowErrorMsg] = useState(null);
+	const [showErrorMsg, setShowErrorMsg] = useState({
+		status: null,
+		errorMsg: null,
+	});
 	function saveFeed(evt) {
 		evt.preventDefault();
-		try {
-			const serviceResult = callService({
-				url: url,
-				feedName: name,
-				lastUpdate: moment(new Date()).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
+
+		callService({
+			url: url,
+			feedName: name,
+			lastUpdate: moment(new Date()).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
+		})
+			.then(() => setShowErrorMsg({ status: false }))
+			.catch((e) => {
+				setShowErrorMsg({ status: true, errorMsg: e.response.data.message });
 			});
-			if (serviceResult) {
-				setShowErrorMsg(false);
-			}
-		} catch (e) {
-			setShowErrorMsg(true);
-		}
 	}
 	return (
 		<div style={formContainer}>
@@ -107,10 +107,13 @@ function FeedForm() {
 				<br />
 				<input type="submit" value="Add Feed" style={submitButton}></input>
 				<p style={submitStatusMessage}>
-					{showErrorMsg === true && (
-						<i>We couldn't save that feed. Try again!</i>
+					{showErrorMsg.status === true && (
+						<i>
+							We couldn't save that feed. Cause: {showErrorMsg.errorMsg}. Try
+							again!
+						</i>
 					)}
-					{showErrorMsg === false && <i>Feed saved!</i>}
+					{showErrorMsg.status === false && <i>Feed saved!</i>}
 				</p>
 			</form>
 		</div>
