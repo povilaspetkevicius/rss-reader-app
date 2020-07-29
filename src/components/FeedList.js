@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FeedDetail from './FeedDetail';
 
-const APIURL = 'http://localhost:8080/api';
+const APIURL = `http://${process.env.REACT_APP_API_URL}/api`;
 
 const listContainer = {
 	minWidth: '10rem',

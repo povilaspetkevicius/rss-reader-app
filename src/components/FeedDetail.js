@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import Item from './Item';
 import axios from 'axios';
-const APIURL = 'http://localhost:8080/api';
+
+const APIURL = `http://${process.env.REACT_APP_API_URL}/api`;
+
 const feedButton = {
 	width: '50%',
 	float: 'center',

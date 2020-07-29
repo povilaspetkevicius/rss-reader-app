@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import axios from 'axios';
-const APIURL = 'http://localhost:8080/api';
+
+const APIURL = `http://${process.env.REACT_APP_API_URL}/api`;
+
 const formContainer = {
 	minWidth: '10rem',
 	maxWidth: '40rem',
@@ -43,6 +45,12 @@ const submitButton = {
 	margin: '10px',
 };
 
+const submitStatusMessage = {
+	marginLeft: '10px',
+	marginBottom: '10px',
+	fontWeight: 'bold',
+};
+
 const callService = (input) => {
 	console.log(input);
 	const callback = axios
@@ -51,7 +59,6 @@ const callService = (input) => {
 			return response;
 		})
 		.catch((e) => {
-			console.log(e);
 			throw new Error();
 		});
 	return callback;
@@ -60,26 +67,24 @@ const callService = (input) => {
 function FeedForm() {
 	const [url, setUrl] = useState('');
 	const [name, setName] = useState('');
-	const [showErrorMsg, setShowErrorMsg] = useState(false);
+	const [showErrorMsg, setShowErrorMsg] = useState(null);
 	function saveFeed(evt) {
 		evt.preventDefault();
 		try {
-			callService({
+			const serviceResult = callService({
 				url: url,
 				feedName: name,
 				lastUpdate: moment(new Date()).format('ddd, DD MMM YYYY HH:mm:ss ZZ'),
 			});
+			if (serviceResult) {
+				setShowErrorMsg(false);
+			}
 		} catch (e) {
 			setShowErrorMsg(true);
 		}
 	}
 	return (
 		<div style={formContainer}>
-			{showErrorMsg && (
-				<p>
-					<i>We couldn't save that feed. Try again!</i>
-				</p>
-			)}
 			<h4 style={header}>Add XML RSS feed</h4>
 			<br />
 			<p style={textBlock}>
@@ -101,6 +106,12 @@ function FeedForm() {
 				></input>
 				<br />
 				<input type="submit" value="Add Feed" style={submitButton}></input>
+				<p style={submitStatusMessage}>
+					{showErrorMsg === true && (
+						<i>We couldn't save that feed. Try again!</i>
+					)}
+					{showErrorMsg === false && <i>Feed saved!</i>}
+				</p>
 			</form>
 		</div>
 	);
